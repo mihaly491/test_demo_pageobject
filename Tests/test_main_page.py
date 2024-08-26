@@ -57,38 +57,38 @@ class TestGuestBuyProduct:
         order_success_page.should_be_text_in_confirm_message(TestData.ORDER_CONFIRMED_MSG)
         order_success_page.should_be_selected_product_in_item_list(TestData.PRODUCT)
 
-    class TestAuthorizedUserBuyProduct:
-        @pytest.fixture(scope="function", autouse=True)
-        def setup(self, driver):
-            link = TestData.BASE_URL
-            page = MainPage(driver, link)
-            page.open()
-            page.login_with_name_and_password(TestData.USER_NAME, TestData.PASSWORD)
+class TestAuthorizedUserBuyProduct:
+    @pytest.fixture(scope="function", autouse=True)
+    def setup(self, driver):
+        link = TestData.BASE_URL
+        page = MainPage(driver, link)
+        page.open()
+        page.login_with_name_and_password(TestData.USER_NAME, TestData.PASSWORD)
 
-            yield
+        yield
 
-            link = TestData.BASE_URL + "/logout"
-            page = MainPage(driver, link)
-            page.open()
+        link = TestData.BASE_URL + "/logout"
+        page = MainPage(driver, link)
+        page.open()
 
-        def test_user_can_open_product_page_from_main_page(self, driver):
-            page = MainPage(driver, TestData.BASE_URL)
-            page.open()
-            page.accept_cookies()
-            page.choose_product_from_product_area()
+    def test_user_can_open_product_page_from_main_page(self, driver):
+        page = MainPage(driver, TestData.BASE_URL)
+        page.open()
+        page.accept_cookies()
+        page.choose_product_from_product_area()
 
-        def test_user_can_confirm_the_order(self, driver):
-            page = MainPage(driver, TestData.BASE_URL)
-            page.open()
-            page.accept_cookies()
-            page.choose_product_from_product_area()
-            product_page = ProductPage(driver, TestData.BASE_URL)
-            product_page.choose_size(TestData.PRODUCT_SIZE)
-            product_page.add_to_cart()
-            product_page.should_be_items_in_cart_badge()
-            product_page.go_to_checkout_page()
-            checkout_page = CheckoutPage(driver, TestData.BASE_URL)
-            checkout_page.confirm_order()
-            order_success_page = OrderSuccessPage(driver, TestData.BASE_URL)
-            order_success_page.should_be_text_in_confirm_message(TestData.ORDER_CONFIRMED_MSG)
-            order_success_page.should_be_selected_product_in_item_list(TestData.PRODUCT)
+    def test_user_can_confirm_the_order(self, driver):
+        page = MainPage(driver, TestData.BASE_URL)
+        page.open()
+        page.accept_cookies()
+        page.choose_product_from_product_area()
+        product_page = ProductPage(driver, TestData.BASE_URL)
+        product_page.choose_size(TestData.PRODUCT_SIZE)
+        product_page.add_to_cart()
+        product_page.should_be_items_in_cart_badge()
+        product_page.go_to_checkout_page()
+        checkout_page = CheckoutPage(driver, TestData.BASE_URL)
+        checkout_page.confirm_order()
+        order_success_page = OrderSuccessPage(driver, TestData.BASE_URL)
+        order_success_page.should_be_text_in_confirm_message(TestData.ORDER_CONFIRMED_MSG)
+        order_success_page.should_be_selected_product_in_item_list(TestData.PRODUCT)
