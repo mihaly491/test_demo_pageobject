@@ -32,10 +32,25 @@ class ProductPageLocators:
 class CheckoutPageLocators:
     CHECKOUT_WRAPPER = (By.CLASS_NAME, "cart wrapper")
     CHECKOUT_CART = (By.ID, "box-checkout-cart")
+    ITEM_PRICE = (By.CLASS_NAME, "unit-price")
+
+    COMPANY_INPUT = (By.NAME, "company")
+    TAX_ID_INPUT = (By.NAME, "tax_id")
+    FIRSTNAME_INPUT = (By.NAME, "firstname")
+    LASTNAME_INPUT = (By.NAME, "lastname")
+    ADDRESS1_INPUT = (By.NAME, "address1")
+    ADDRESS2_INPUT = (By.NAME, "address2")
+    POSTALCODE_INPUT = (By.NAME, "postcode")
+    CITY_INPUT = (By.NAME, "city")
+    COUNTRY_CODE_SELECT = (By.NAME, "country_code")
+    ZONE_CODE_SELECT = (By.NAME, "zone_code")
+    EMAIL_INPUT = (By.NAME, "email")
+    PHONE_INPUT = (By.NAME, "phone")
+
     CHECKOUT_CART_ITEMS = (By.CSS_SELECTOR, "#box-checkout-cart .items")
     CHECKBOX_TERMS_AGREED = (By.NAME, "terms_agreed")
     CONFIRM_ORDER_BTN = (By.NAME, "confirm_order")
-    ITEM_PRICE = (By.CLASS_NAME, "unit-price")
+    SAVE_CHANGES_BTN = (By.NAME, "save_customer_details")
 
 
 class OrderSuccessPageLocators:

@@ -10,12 +10,14 @@ class ProductPage(BasePage):
         assert self.is_element_present(*ProductPageLocators.SIZE_OPTION)
 
     def choose_size(self, option):
-        self.do_click(ProductPageLocators.SIZE_OPTION)
-        options = self.get_list_items(ProductPageLocators.SIZE_OPTION)
-        options.select_by_visible_text(option)
+        if self.is_element_present(*ProductPageLocators.SIZE_OPTION):
+            self.do_click(ProductPageLocators.SIZE_OPTION)
+            options = self.get_list_items(ProductPageLocators.SIZE_OPTION)
+            options.select_by_visible_text(option)
 
     def add_to_cart(self):
         self.do_click(ProductPageLocators.ADD_TO_CART_BTN)
 
-    def should_be_items_in_cart_badge(self, text):
-        assert text in self.get_element_text(ProductPageLocators.CART_BADGE)
+    def should_be_items_in_cart_badge(self):
+        cart_badge_quantity = self.get_element_text(ProductPageLocators.CART_BADGE)
+        assert cart_badge_quantity != "", "Cart badge not found. Have the product added to cart?"

@@ -6,11 +6,10 @@ from Pages.locators import OrderSuccessPageLocators
 
 class OrderSuccessPage(BasePage):
 
-    def __init__(self, driver):
-        super().__init__(driver)
-
     def should_be_text_in_confirm_message(self, text):
-        assert text in self.get_element_text(OrderSuccessPageLocators.ORDER_CONFIRMED_MSG)
+        assert text in self.get_element_text(OrderSuccessPageLocators.ORDER_CONFIRMED_MSG), \
+            "Text not found, order failed"
 
     def should_be_selected_product_in_item_list(self, product):
-        assert product in self.get_element_text(OrderSuccessPageLocators.ITEM_LIST)
+        assert product in self.get_element_text(OrderSuccessPageLocators.ITEM_LIST), \
+            "No selected item found in item list"

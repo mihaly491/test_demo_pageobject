@@ -92,4 +92,8 @@ class BasePage:
         assert self.is_element_present(*BasePageLocators.COOKIE_NOTICE), "User doesn't see cookie alert"
 
     def accept_cookies(self):
-        self.do_click(BasePageLocators.ACCEPT_COOKIES_BTN)
+        if self.is_element_present(*BasePageLocators.COOKIE_NOTICE):
+            self.do_click(BasePageLocators.ACCEPT_COOKIES_BTN)
+
+    def go_to_checkout_page(self):
+        self.do_click(BasePageLocators.CART)
