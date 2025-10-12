@@ -19,14 +19,21 @@ class MainPageLocators:
     ALERT_MSG = (By.CSS_SELECTOR, ".alert.alert-success")
     PRODUCT_AREA = (By.CSS_SELECTOR, "article.product")
     PRODUCT_BOX = (By.CSS_SELECTOR, "article.product img")
-    PRODUCT_IMAGE = (By.XPATH, f"//img[@alt='{TestData.PRODUCT}']")
+
+    @staticmethod
+    def product_image(product_name):
+        return (By.XPATH, f"//img[@alt='{product_name}']")
 
 
 class ProductPageLocators:
-    PRODUCT_TITLE = (By.CSS_SELECTOR, "h1.title")
-    SIZE_OPTION = (By.NAME, "options[Size]")
     ADD_TO_CART_BTN = (By.NAME, "add_cart_product")
     CART_BADGE = (By.CSS_SELECTOR, "#cart .badge")
+    PRODUCT_TITLE = (By.CSS_SELECTOR, "h1.title")
+    SIZE_OPTION = (By.NAME, "options[Size]")
+
+    @staticmethod
+    def size_option(size_name):
+        return (By.XPATH, f"//select[@name='options[Size]']/option[text()='{size_name}']")
 
 
 class CheckoutPageLocators:
@@ -56,3 +63,4 @@ class CheckoutPageLocators:
 class OrderSuccessPageLocators:
     ORDER_CONFIRMED_MSG = (By.CLASS_NAME, "card-title")
     ITEM_LIST = (By.CLASS_NAME, "item")
+

@@ -15,6 +15,6 @@ class MainPage(BasePage):
     def should_be_text_in_alert_message(self, text):
         assert text in self.get_element_text(MainPageLocators.ALERT_MSG), f"Text {text} not found in alert message"
 
-    def choose_product_from_product_area(self):
+    def choose_product_from_product_area(self, product):
         self.scroll_to_element(MainPageLocators.PRODUCT_AREA)
-        self.do_click(MainPageLocators.PRODUCT_IMAGE)
+        self.do_click(MainPageLocators.product_image(product))

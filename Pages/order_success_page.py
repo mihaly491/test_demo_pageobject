@@ -3,7 +3,6 @@ from Base.base_page import BasePage
 from Config.config import TestData
 from Pages.locators import OrderSuccessPageLocators
 
-
 class OrderSuccessPage(BasePage):
 
     def should_be_text_in_confirm_message(self, text):

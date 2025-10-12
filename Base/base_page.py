@@ -1,6 +1,6 @@
 import time
 
-from selenium.common import NoSuchElementException, TimeoutException
+from selenium.common import NoSuchElementException, TimeoutException, StaleElementReferenceException
 from selenium.webdriver import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -40,26 +40,30 @@ class BasePage:
         except TimeoutException:
             return False
 
-    def is_element_present(self, how, what):
+    def is_element_present(self, how, what, timeout=5):
         try:
-            self.driver.find_element(how, what)
-        except NoSuchElementException:
+            WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((how, what)))
+            return True
+        except (NoSuchElementException, TimeoutException, StaleElementReferenceException):
             return False
-        return True
 
     def is_not_element_present(self, how, what, timeout=5):
         try:
             WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((how, what)))
         except TimeoutException:
             return True
-        return False
 
     def get_page_title(self, title):
         WebDriverWait(self.driver, 10).until(EC.title_is(title))
         return self.driver.title
 
-    def wait_for_element_to_load(self, by_locator):
-        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(by_locator))
+    def wait_for_element(self, how, what, timeout=10):
+        try:
+            element = WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((how, what)))
+            return element
+        except TimeoutException:
+            raise AssertionError(f"Element {what} not found at {how} seconds")
+
 
     def scroll_to_element(self, by_locator):
         actions = ActionChains(self.driver)

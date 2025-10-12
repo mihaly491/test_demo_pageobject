@@ -2,8 +2,12 @@
 
 Test data in Config/config.py
 
-All tests are in Tests folder
+Run test_main_page.py
 
-Test/conftest.py is used to set up Selenium driver.
+conftest.py is used to set up Selenium driver.
 
 Use https://googlechromelabs.github.io/chrome-for-testing/#stable for chromedriver and https://github.com/mozilla/geckodriver/releases for geckodriver
+
+Run with `pytest --alluredir=allure-results`
+
+Generate report with `allure serve allure-results`
