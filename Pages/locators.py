@@ -40,6 +40,7 @@ class CheckoutPageLocators:
     CHECKOUT_WRAPPER = (By.CLASS_NAME, "cart wrapper")
     CHECKOUT_CART = (By.ID, "box-checkout-cart")
     ITEM_PRICE = (By.CLASS_NAME, "unit-price")
+    CARD_BODY = (By.CLASS_NAME, "card-body")
 
     COMPANY_INPUT = (By.NAME, "company")
     TAX_ID_INPUT = (By.NAME, "tax_id")

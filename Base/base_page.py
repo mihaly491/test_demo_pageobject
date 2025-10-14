@@ -20,14 +20,31 @@ class BasePage:
         self.driver.get(self.url)
         self.driver.maximize_window()
 
+    def wait_for_page_stability(self, timeout=10):
+        WebDriverWait(self.driver, timeout).until(
+            lambda d: d.execute_script("return document.readyState") == "complete"
+        )
+        try:
+            WebDriverWait(self.driver, timeout).until(
+                lambda d: d.execute_script("return jQuery.active == 0")
+            )
+        except Exception:
+            pass
+
     def do_click(self, by_locator):
-        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(by_locator)).click()
+        element = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(by_locator))
+        element.click()
+        self.wait_for_page_stability()
 
     def do_clear(self, by_locator):
-        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(by_locator)).clear()
+        element = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(by_locator))
+        element.clear()
+        self.wait_for_page_stability()
 
     def do_send_keys(self, by_locator, text):
-        WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(by_locator)).send_keys(text)
+        element = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(by_locator))
+        element.send_keys(text)
+        self.wait_for_page_stability()
 
     def get_element_text(self, by_locator):
         element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(by_locator))
@@ -63,7 +80,6 @@ class BasePage:
             return element
         except TimeoutException:
             raise AssertionError(f"Element {what} not found at {how} seconds")
-
 
     def scroll_to_element(self, by_locator):
         actions = ActionChains(self.driver)

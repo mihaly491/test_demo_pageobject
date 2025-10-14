@@ -30,22 +30,14 @@ class CheckoutPage(BasePage):
         f = Faker('en_US')
 
         self.do_send_keys(CheckoutPageLocators.FIRSTNAME_INPUT, f.first_name())
-        sleep(1)
         self.do_send_keys(CheckoutPageLocators.LASTNAME_INPUT, f.last_name())
-        sleep(1)
         self.do_send_keys(CheckoutPageLocators.ADDRESS1_INPUT, f.address())
-        sleep(1)
         self.do_send_keys(CheckoutPageLocators.POSTALCODE_INPUT, f.postalcode())
-        sleep(1)
         self.do_send_keys(CheckoutPageLocators.CITY_INPUT, f.city())
-        sleep(1)
         self.get_list_items(CheckoutPageLocators.COUNTRY_CODE_SELECT).select_by_visible_text("United States")
-        sleep(1)
         # self.get_list_items(CheckoutPageLocators.ZONE_CODE_SELECT).select_by_visible_text("Alabama")
         self.do_send_keys(CheckoutPageLocators.EMAIL_INPUT, f.email())
-        sleep(1)
         self.do_send_keys(CheckoutPageLocators.PHONE_INPUT, "1234567")
-        sleep(1)
 
     def save_changes(self):
         self.do_click(CheckoutPageLocators.SAVE_CHANGES_BTN)
