@@ -11,8 +11,3 @@ class TestData:
     PRODUCT_SIZE = "Small"
     PRODUCT_SIZES = ["Small", "Medium", "Large"]
 
-    def change_product(self, product):
-        self.PRODUCT = product
-
-    def change_product_size(self, size):
-        self.PRODUCT_SIZE = size
