@@ -11,14 +11,15 @@ from Pages.locators import BasePageLocators
 
 class BasePage:
 
-    def __init__(self, driver, url, timeout=10):
+    def __init__(self, driver, url):
         self.driver = driver
         self.url = url
-        self.driver.implicitly_wait(timeout)
+        self.wait_for_page_stability()
 
     def open(self):
         self.driver.get(self.url)
         self.driver.maximize_window()
+        self.wait_for_page_stability()
 
     def wait_for_page_stability(self, timeout=10):
         WebDriverWait(self.driver, timeout).until(

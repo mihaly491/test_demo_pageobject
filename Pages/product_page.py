@@ -7,6 +7,10 @@ from Pages.locators import ProductPageLocators
 
 class ProductPage(BasePage):
 
+    def __init__(self, driver, url):
+        super().__init__(driver, url)
+        self.wait_for_page_stability()
+
     def should_be_size_select(self):
         assert self.is_element_present(*ProductPageLocators.SIZE_OPTION)
 

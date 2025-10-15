@@ -4,7 +4,6 @@ from Base.base_page import BasePage
 from Config.config import TestData
 from Pages.locators import CheckoutPageLocators
 from faker import Faker
-from time import sleep
 
 
 class CheckoutPage(BasePage):
@@ -12,6 +11,7 @@ class CheckoutPage(BasePage):
     def __init__(self, driver, url):
         super().__init__(driver, url)
         self.item_price = None
+        self.wait_for_page_stability()
 
     def should_be_items_in_cart(self):
         assert CheckoutPageLocators.CHECKOUT_CART in CheckoutPageLocators.CHECKOUT_WRAPPER

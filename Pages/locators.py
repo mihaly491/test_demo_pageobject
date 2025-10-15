@@ -62,6 +62,6 @@ class CheckoutPageLocators:
 
 
 class OrderSuccessPageLocators:
-    ORDER_CONFIRMED_MSG = (By.CLASS_NAME, "card-title")
-    ITEM_LIST = (By.CLASS_NAME, "item")
+    ORDER_CONFIRMED_MSG = (By.CSS_SELECTOR, "h1.card-title")
+    ITEM_LIST = (By.CSS_SELECTOR, "ul > li.item")
 

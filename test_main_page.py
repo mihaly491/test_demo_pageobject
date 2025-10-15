@@ -1,6 +1,4 @@
 from Config.config import TestData
-from itertools import product
-from Pages.common import CommonObjects
 from Pages.main_page import MainPage
 from Pages.product_page import ProductPage
 from Pages.checkout_page import CheckoutPage
@@ -8,7 +6,6 @@ from Pages.order_success_page import OrderSuccessPage
 import allure
 import pytest
 from selenium import webdriver
-from time import sleep
 
 
 @allure.feature("Проверка авторизации")
@@ -21,7 +18,6 @@ class TestAuthorization:
         page.open()
         with allure.step("Ввести логин, пароль и авторизоваться"):
             page.login_with_name_and_password(TestData.USER_NAME, TestData.PASSWORD)
-        sleep(1)
         with allure.step("Проверить наличие сообщения об успешной авторизации"):
             page.should_be_text_in_alert_message(TestData.ALERT_MSG)
 
@@ -33,7 +29,6 @@ class TestGuestBuyProduct:
     def test_guest_can_see_cookie_alert(self, driver):
         page = MainPage(driver, TestData.BASE_URL)
         page.open()
-        sleep(1)
         with allure.step("Проверить, что отображается предупреждение о cookies"):
             page.should_be_cookie_alert()
 
@@ -43,7 +38,6 @@ class TestGuestBuyProduct:
         page = MainPage(driver, TestData.BASE_URL)
         page.open()
         page.accept_cookies()
-        sleep(1)
         with allure.step(f"Выбрать товар '{TestData.BASE_URL}' из блока товаров"):
             page.choose_product_from_product_area(TestData.PRODUCT)
 
@@ -58,7 +52,6 @@ class TestGuestBuyProduct:
         product_page.choose_size(TestData.PRODUCT_SIZE)
         with allure.step("Добавить товар в корзину"):
             product_page.add_to_cart()
-        sleep(1)
         with allure.step("Проверить, что отображается значок количества товаров"):
             product_page.should_be_items_in_cart_badge()
 
@@ -86,7 +79,6 @@ class TestGuestBuyProduct:
 
         with allure.step("Проверить успешное подтверждение заказа"):
             order_success_page = OrderSuccessPage(driver, TestData.BASE_URL)
-            sleep(1)
             order_success_page.should_be_text_in_confirm_message(TestData.ORDER_CONFIRMED_MSG)
             order_success_page.should_be_selected_product_in_item_list(TestData.PRODUCT)
 
@@ -120,7 +112,6 @@ class TestGuestBuyProduct:
 
         with allure.step("Проверить сообщение об успешном заказе"):
             order_success_page = OrderSuccessPage(driver, TestData.BASE_URL)
-            sleep(1)
             order_success_page.should_be_text_in_confirm_message(TestData.ORDER_CONFIRMED_MSG)
             order_success_page.should_be_selected_product_in_item_list(product_name)
 
@@ -146,7 +137,6 @@ class TestAuthorizedUserBuyProduct:
     def test_user_can_open_product_page_from_main_page(self, driver):
         page = MainPage(driver, TestData.BASE_URL)
         page.open()
-        sleep(1)
         with allure.step(f"Выбрать товар '{TestData.PRODUCT}'"):
             page.choose_product_from_product_area(TestData.PRODUCT)
 
@@ -170,7 +160,6 @@ class TestAuthorizedUserBuyProduct:
 
         with allure.step("Проверить сообщение об успешном заказе"):
             order_success_page = OrderSuccessPage(driver, TestData.BASE_URL)
-            sleep(1)
             order_success_page.should_be_text_in_confirm_message(TestData.ORDER_CONFIRMED_MSG)
             order_success_page.should_be_selected_product_in_item_list(TestData.PRODUCT)
 
@@ -200,6 +189,5 @@ class TestAuthorizedUserBuyProduct:
 
         with allure.step("Проверить сообщение об успешном заказе"):
             order_success_page = OrderSuccessPage(driver, TestData.BASE_URL)
-            sleep(1)
             order_success_page.should_be_text_in_confirm_message(TestData.ORDER_CONFIRMED_MSG)
             order_success_page.should_be_selected_product_in_item_list(product_name)
