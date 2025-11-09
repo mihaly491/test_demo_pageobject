@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
 from Pages.locators import BasePageLocators
+import allure
 
 
 class BasePage:
@@ -16,10 +17,62 @@ class BasePage:
         self.url = url
         self.wait_for_page_stability()
 
+    @staticmethod
+    def log_step(action: str, by_locator=None, extra: str = ""):
+        if by_locator:
+            by, value = by_locator
+            step_text = f"{action}: {by} → {value}"
+        else:
+            step_text = action
+        if extra:
+            step_text += f" [{extra}]"
+
+        with allure.step(step_text):
+            pass
+
+    def assert_with_allure(self, condition, expected, actual, message="Проверка условия"):
+        allure.attach(
+            f"Ожидаемый результат: {expected}\nФактический результат: {actual}",
+            name=f"Результат проверки — {message}",
+            attachment_type=allure.attachment_type.TEXT
+        )
+
+        if not condition:
+            try:
+                allure.attach(
+                    self.driver.get_screenshot_as_png(),
+                    name="Скриншот при ошибке",
+                    attachment_type=allure.attachment_type.PNG
+                )
+                allure.attach(
+                    self.driver.page_source,
+                    name="HTML страницы при ошибке",
+                    attachment_type=allure.attachment_type.HTML
+                )
+            except Exception as e:
+                print(f"[Allure] Не удалось прикрепить дополнительные материалы: {e}")
+
+        assert condition, f"{message}\nОжидаемый результат: {expected}\nФактический результат: {actual}"
+
+    def assert_equals(self, expected, actual, message="Проверка равенства"):
+        self.assert_with_allure(expected == actual, expected, actual, message)
+
+    def assert_contains(self, expected_substring, actual, message="Проверка содержимого"):
+        self.assert_with_allure(expected_substring in actual, expected_substring, actual, message)
+
     def open(self):
+        self.log_step(f"Открыть страницу {self.url}")
         self.driver.get(self.url)
         self.driver.maximize_window()
         self.wait_for_page_stability()
+
+    def switch_to_new_tab(self):
+        self.log_step(f"Переключиться на другую вкладку")
+        handles = self.driver.window_handles
+        if len(handles) > 1:
+            self.driver.switch_to.window(handles[-1])
+        else:
+            raise AssertionError("No new tab found to switch to!")
 
     def wait_for_page_stability(self, timeout=10):
         WebDriverWait(self.driver, timeout).until(
@@ -33,25 +86,54 @@ class BasePage:
             pass
 
     def do_click(self, by_locator):
+        self.log_step("Клик по элементу", by_locator)
         element = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(by_locator))
         element.click()
         self.wait_for_page_stability()
 
     def do_clear(self, by_locator):
+        self.log_step("Очистить поле", by_locator)
         element = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(by_locator))
         element.clear()
         self.wait_for_page_stability()
 
     def do_send_keys(self, by_locator, text):
+        self.log_step("Ввод текста", by_locator, extra=text)
         element = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(by_locator))
         element.send_keys(text)
         self.wait_for_page_stability()
 
     def get_element_text(self, by_locator):
+        self.log_step("Получение текста элемента", by_locator)
         element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(by_locator))
-        return element.text
+        text = element.text.strip()
+
+        with allure.step(f"Текст элемента: {text[:50]}..."):
+            pass
+
+        allure.attach(
+            text,
+            name=f"Текст элемента {by_locator[1]}",
+            attachment_type=allure.attachment_type.TEXT
+        )
+
+        return text
+
+    def get_element_value(self, by_locator):
+        self.log_step("Получение значения из поля", by_locator)
+        element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(by_locator))
+        value = element.get_attribute("value")
+
+        allure.attach(
+            str(value),
+            name=f"Значение элемента {by_locator[1]}",
+            attachment_type=allure.attachment_type.TEXT
+        )
+
+        return value
 
     def is_enabled(self, by_locator):
+        self.log_step("Проверить доступность элемента", by_locator)
         try:
             WebDriverWait(self.driver, 3).until(EC.visibility_of_element_located(by_locator))
             return True
@@ -59,6 +141,7 @@ class BasePage:
             return False
 
     def is_element_present(self, how, what, timeout=5):
+        self.log_step("Проверка присутствия элемента", (how, what))
         try:
             WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((how, what)))
             return True
@@ -66,6 +149,7 @@ class BasePage:
             return False
 
     def is_not_element_present(self, how, what, timeout=5):
+        self.log_step("Проверка отсутствия элемента", (how, what))
         try:
             WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((how, what)))
         except TimeoutException:
@@ -83,6 +167,7 @@ class BasePage:
             raise AssertionError(f"Element {what} not found at {how} seconds")
 
     def scroll_to_element(self, by_locator):
+        self.log_step("Прокрутка страницы до элемента", by_locator)
         actions = ActionChains(self.driver)
         element = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(by_locator))
         actions.move_to_element(element)
@@ -98,10 +183,18 @@ class BasePage:
                 continue
 
     def get_list_items(self, by_locator):
+        self.log_step("Получить все значения из списка", by_locator)
         items = Select(WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(by_locator)))
         return items
 
+    def get_list_item_text(self, by_locator):
+        self.log_step("Получить значение из списка", by_locator)
+        select_object = Select(WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(by_locator)))
+        selected_option = select_object.first_selected_option
+        return selected_option.text
+
     def login_with_name_and_password(self, username: str, password: str):
+        self.log_step("Ввести логин, пароль и авторизоваться", (username, password))
         self.do_click(BasePageLocators.SIGNUP_NAV_BTN)
         self.do_clear(BasePageLocators.EMAIL_INPUT)
         self.do_clear(BasePageLocators.PASSWORD_INPUT)
@@ -110,11 +203,14 @@ class BasePage:
         self.do_click(BasePageLocators.LOGIN_BTN)
 
     def should_be_cookie_alert(self):
+        self.log_step("Проверить, что отображается предупреждение о cookies")
         assert self.is_element_present(*BasePageLocators.COOKIE_NOTICE), "User doesn't see cookie alert"
 
     def accept_cookies(self):
+        self.log_step("Принять cookies")
         if self.is_element_present(*BasePageLocators.COOKIE_NOTICE):
             self.do_click(BasePageLocators.ACCEPT_COOKIES_BTN)
 
     def go_to_checkout_page(self):
+        self.log_step("Перейти на страницу оформления заказа")
         self.do_click(BasePageLocators.CART)

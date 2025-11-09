@@ -72,6 +72,20 @@ def driver(request):
         if platform.system().lower() == 'linux':
             options.add_argument('--no-sandbox')
             options.add_argument('--disable-dev-shm-usage')
+
+        options.add_experimental_option(
+            "excludeSwitches",
+            [
+                "enable-automation",
+                "password-manager-reauthentication",
+                "enable-password-manager"
+            ]
+        )
+        options.add_experimental_option("prefs", {
+            "credentials_enable_service": False,
+            "profile.password_manager_enabled": False,
+        })
+
     elif browser_name == "firefox":
         options = webdriver.FirefoxOptions()
     elif browser_name == "edge":
