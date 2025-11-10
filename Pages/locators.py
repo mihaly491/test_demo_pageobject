@@ -3,6 +3,7 @@ from Config.config import TestData
 
 
 class BasePageLocators:
+    SITE_LOGO = (By.CSS_SELECTOR, "a.logotype")
     SEARCH = (By.NAME, "query")
     REGIONAL_SETTINGS = (By.CLASS_NAME, "regional-setting")
     ACCOUNT = (By.CLASS_NAME, "account")

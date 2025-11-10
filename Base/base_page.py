@@ -119,6 +119,18 @@ class BasePage:
 
         return text
 
+    def get_elements_text(self, by_locator):
+        self.log_step("Получение текста из списка элементов", by_locator)
+        elements = WebDriverWait(self.driver, 10).until(EC.visibility_of_all_elements_located(by_locator))
+        texts = [el.text.strip() for el in elements if el.text.strip()]
+
+        allure.attach(
+            "\n".join(texts),
+            name=f"Список найденныхх элементов ({len(texts)})",
+            attachment_type=allure.attachment_type.TEXT
+        )
+        return texts
+
     def get_element_value(self, by_locator):
         self.log_step("Получение значения из поля", by_locator)
         element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(by_locator))
@@ -140,18 +152,18 @@ class BasePage:
         except TimeoutException:
             return False
 
-    def is_element_present(self, how, what, timeout=5):
-        self.log_step("Проверка присутствия элемента", (how, what))
+    def is_element_present(self, by_locator, timeout=5):
+        self.log_step("Проверка присутствия элемента", by_locator)
         try:
-            WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((how, what)))
+            WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located(by_locator))
             return True
         except (NoSuchElementException, TimeoutException, StaleElementReferenceException):
             return False
 
-    def is_not_element_present(self, how, what, timeout=5):
-        self.log_step("Проверка отсутствия элемента", (how, what))
+    def is_not_element_present(self, by_locator, timeout=5):
+        self.log_step("Проверка отсутствия элемента", by_locator)
         try:
-            WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((how, what)))
+            WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located(by_locator))
         except TimeoutException:
             return True
 
@@ -159,12 +171,14 @@ class BasePage:
         WebDriverWait(self.driver, 10).until(EC.title_is(title))
         return self.driver.title
 
-    def wait_for_element(self, how, what, timeout=10):
+
+    def wait_for_element(self, by_locator, timeout=10):
+        self.log_step("Дождаться появления элемента", by_locator)
         try:
-            element = WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located((how, what)))
+            element = WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located(by_locator))
             return element
         except TimeoutException:
-            raise AssertionError(f"Element {what} not found at {how} seconds")
+            raise AssertionError(f"Element {by_locator} not found at {timeout} seconds")
 
     def scroll_to_element(self, by_locator):
         self.log_step("Прокрутка страницы до элемента", by_locator)
@@ -204,13 +218,17 @@ class BasePage:
 
     def should_be_cookie_alert(self):
         self.log_step("Проверить, что отображается предупреждение о cookies")
-        assert self.is_element_present(*BasePageLocators.COOKIE_NOTICE), "User doesn't see cookie alert"
+        assert self.is_element_present(BasePageLocators.COOKIE_NOTICE), "User doesn't see cookie alert"
 
     def accept_cookies(self):
         self.log_step("Принять cookies")
-        if self.is_element_present(*BasePageLocators.COOKIE_NOTICE):
+        if self.is_element_present(BasePageLocators.COOKIE_NOTICE):
             self.do_click(BasePageLocators.ACCEPT_COOKIES_BTN)
 
     def go_to_checkout_page(self):
         self.log_step("Перейти на страницу оформления заказа")
         self.do_click(BasePageLocators.CART)
+
+    def go_to_main_page(self):
+        self.log_step("Перейти на главную страницу")
+        self.do_click(BasePageLocators.SITE_LOGO)

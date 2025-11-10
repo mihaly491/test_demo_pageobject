@@ -125,39 +125,50 @@ class TestGuestBuyProduct:
             order_printable_copy_page = OrderPrintableCopyPage(driver, TestData.BASE_URL, guest_data)
             order_printable_copy_page.assert_order_matches_checkout()
 
-    @pytest.mark.parametrize("product_name,size", [
-        (p, s) if p in TestData.PRODUCTS_WITH_SIZES else (p, None)
-        for p in TestData.PRODUCTS
-        for s in (TestData.PRODUCT_SIZES if p in TestData.PRODUCTS_WITH_SIZES else [None])
-    ])
-    @allure.story("Гость может оформить заказ на каждый доступный товар")
-    @allure.title("Покупка {product_name} (размер: {size}")
-    def test_guest_can_buy_every_product_from_product_area(self, driver, product_name, size):
-        with allure.step("Открыть страницу и выбрать товар из блока товаров"):
-            page = MainPage(driver, TestData.BASE_URL)
-            page.open()
-            page.accept_cookies()
-            page.choose_product_from_product_area(product_name)
+    @allure.story("Гость может купить все товары одним заказом")
+    @allure.title("Покупка всех товаров из каталога и проверка заказа")
+    @pytest.mark.usefixtures("driver")
+    def test_guest_can_buy_all_products_at_once(self, driver):
+        page = MainPage(driver, TestData.BASE_URL)
+        page.open()
+        page.accept_cookies()
 
-        with allure.step("Добавить товар в корзину"):
-            product_page = ProductPage(driver, TestData.BASE_URL)
-            if size:
-                product_page.choose_size(size)
-            product_page.add_to_cart()
-            product_page.should_be_items_in_cart_badge()
-            product_page.go_to_checkout_page()
+        added_products = []
+        total_products = len(TestData.PRODUCTS)
+
+        with allure.step(f"Добавить всех товаров ({total_products}) в корзину"):
+            for index, product_name in enumerate(TestData.PRODUCTS, start=1):
+                with allure.step(f"Добавление товара №{index}: {product_name}"):
+                    page.choose_product_from_product_area(product_name)
+
+                    product_page = ProductPage(driver, TestData.BASE_URL)
+
+                    if hasattr(TestData, "PRODUCTS_WITH_SIZES") and product_name in TestData.PRODUCTS_WITH_SIZES:
+                        product_page.choose_size(TestData.PRODUCT_SIZES[0])
+
+                    cart_count = product_page.add_to_cart(total_expected=total_products)
+                    assert cart_count == index, (
+                        f"Ожидалось {index} товаров в корзине, но отображается {cart_count}"
+                    )
+
+                    added_products.append(product_name)
+                    page.open()
 
         with allure.step("Оформить заказ"):
+            page.go_to_checkout_page()
             checkout_page = CheckoutPage(driver, TestData.BASE_URL)
             checkout_page.fill_in_required_fields()
             checkout_page.save_checkout_data()
             checkout_page.save_changes()
             checkout_page.confirm_order()
 
-        with allure.step("Проверить сообщение об успешном заказе"):
+        with allure.step("Проверить сообщение об успешном оформлении заказа"):
             order_success_page = OrderSuccessPage(driver, TestData.BASE_URL)
             order_success_page.should_be_text_in_confirm_message(TestData.ORDER_CONFIRMED_MSG)
-            order_success_page.should_be_selected_product_in_item_list(product_name)
+
+        with allure.step("Проверить, что все добавленные товары есть в заказе"):
+            for product_name in added_products:
+                order_success_page.should_be_selected_product_in_item_list(product_name)
 
         with allure.step("Проверить карточку заказа в версии для печати"):
             order_success_page.go_to_order_printable_copy_page()
@@ -227,7 +238,7 @@ class TestAuthorizedUserBuyProduct:
     ])
     @allure.story("Авторизованный пользователь может оформить заказ на каждый доступный товар")
     @allure.title("Покупка {product_name} (размер: {size}")
-    def test_user_can_buy_every_products_from_product_area(self, driver, product_name, size):
+    def test_user_can_buy_every_product_from_product_area(self, driver, product_name, size):
         with allure.step("Выбрать товар с главной страницы"):
             page = MainPage(driver, TestData.BASE_URL)
             page.choose_product_from_product_area(product_name)
@@ -249,6 +260,55 @@ class TestAuthorizedUserBuyProduct:
             order_success_page = OrderSuccessPage(driver, TestData.BASE_URL)
             order_success_page.should_be_text_in_confirm_message(TestData.ORDER_CONFIRMED_MSG)
             order_success_page.should_be_selected_product_in_item_list(product_name)
+
+        with allure.step("Проверить карточку заказа в версии для печати"):
+            order_success_page.go_to_order_printable_copy_page()
+            user_data = checkout_page.load_checkout_data()
+            order_printable_copy_page = OrderPrintableCopyPage(driver, TestData.BASE_URL, user_data)
+            order_printable_copy_page.assert_order_matches_checkout()
+
+    @allure.story("Авторизованный пользователь может купить все товары одним заказом")
+    @allure.title("Покупка всех товаров из каталога и проверка заказа")
+    @pytest.mark.usefixtures("driver")
+    def test_user_can_buy_all_products_at_once(self, driver):
+        page = MainPage(driver, TestData.BASE_URL)
+        page.open()
+        page.accept_cookies()
+
+        added_products = []
+        total_products = len(TestData.PRODUCTS)
+
+        with allure.step(f"Добавить всех товаров ({total_products}) в корзину"):
+            for index, product_name in enumerate(TestData.PRODUCTS, start=1):
+                with allure.step(f"Добавление товара №{index}: {product_name}"):
+                    page.choose_product_from_product_area(product_name)
+
+                    product_page = ProductPage(driver, TestData.BASE_URL)
+
+                    if hasattr(TestData, "PRODUCTS_WITH_SIZES") and product_name in TestData.PRODUCTS_WITH_SIZES:
+                        product_page.choose_size(TestData.PRODUCT_SIZES[0])
+
+                    cart_count = product_page.add_to_cart(total_expected=total_products)
+                    assert cart_count == index, (
+                        f"Ожидалось {index} товаров в корзине, но отображается {cart_count}"
+                    )
+
+                    added_products.append(product_name)
+                    page.open()
+
+        with allure.step("Оформить заказ"):
+            page.go_to_checkout_page()
+            checkout_page = CheckoutPage(driver, TestData.BASE_URL)
+            checkout_page.save_checkout_data()
+            checkout_page.confirm_order()
+
+        with allure.step("Проверить сообщение об успешном оформлении заказа"):
+            order_success_page = OrderSuccessPage(driver, TestData.BASE_URL)
+            order_success_page.should_be_text_in_confirm_message(TestData.ORDER_CONFIRMED_MSG)
+
+        with allure.step("Проверить, что все добавленные товары есть в заказе"):
+            for product_name in added_products:
+                order_success_page.should_be_selected_product_in_item_list(product_name)
 
         with allure.step("Проверить карточку заказа в версии для печати"):
             order_success_page.go_to_order_printable_copy_page()

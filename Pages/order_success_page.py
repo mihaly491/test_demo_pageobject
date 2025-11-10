@@ -15,10 +15,16 @@ class OrderSuccessPage(BasePage):
         actual_text = self.get_element_text(OrderSuccessPageLocators.ORDER_CONFIRMED_MSG)
         self.assert_contains(expected_text, actual_text, "Проверка текста подтверждения заказа")
 
-    @allure.step("Ппроверка наличия выбранного товара в заказе")
+    @allure.step("Проверка наличия выбранного товара в заказе")
     def should_be_selected_product_in_item_list(self, product):
-        actual_items = self.get_element_text(OrderSuccessPageLocators.ITEM_LIST)
-        self.assert_contains(product, actual_items, "Проверка, что товар '{product}' присутствует в заказе")
+        items = self.get_elements_text(OrderSuccessPageLocators.ITEM_LIST)
+        joined_items = ' | '.join(items)
+
+        self.assert_contains(
+            product,
+            joined_items,
+            f"Проверка, что товар '{product}' присутствует в заказе"
+        )
 
     @allure.step("Перейти на версию для печати")
     def go_to_order_printable_copy_page(self):
